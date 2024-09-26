@@ -24,18 +24,8 @@ To deploy this project run
 git clone https://github.com/your-username/currency-exchange-viewer.git
 - Install the required dependencies
 pip install pandas mysql-connector-python matplotlib numpy
-- Set up the MySQL database as
-Create a MySQL database with the name currency_rates.
-
-Create a table called exchange_rates with the following structure:
-
-CREATE TABLE exchange_rates (
-    Date DATE,
-    Currency1 FLOAT,
-    Currency2 FLOAT,
-    -- Add columns for other currencies as needed
-);
-
+- Set up the MySQL database as ->
+[Setup document link](https://docs.google.com/document/d/16WgipFAB8WUTriX2_8TnmiCFMasgfEgfPfu1kADcSRI/edit?usp=sharing)
 - Open the project folder and run the main.py file:
 python main.py
 
