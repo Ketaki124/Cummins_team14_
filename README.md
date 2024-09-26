@@ -1,13 +1,17 @@
 # XRange Analyzer
 
 This project is an application that is GUI-based for displaying currency exchange rates, calculating risk based on volatility, and plotting custom currency baskets. The data is fetched from the MySQL database, the application uses Tkinter for the user interface and Matplotlib for graph plotting. Preprocessing includes filling missing values in the dataset.
+
 ## Features
 
-- Data Preprocessing: It fills in missing values and removes extra spaces in the dataset automatically.
+- Data Preprocessing: The method fills missing exchange rate data using forward fill, backward fill, and linear interpolation, ensuring continuity in the time-series.
 - Currency exchange rate visualization : Displays the weekly, monthly, or quarterly exchange rate of a chosen currency against a base currency.
 - Risk Assessment: The application computes the volatility of a currency and flags it to be "High Risk" or "Low Risk" based on the standard deviation.
 - Custom Basket of Currencies: Build a custom basket of currencies, assigning the weights, and then plot its value against a base currency.
 - Peak and Low Identify: It features the highest and lowest exchange rates within the period considered.
+- A dedicated tab for displaying key terminologies such as "risk factor", "volatility","Appreciation" and "Depreciation" providing users with a better understanding of important financial concepts.
+- Users can save the generated exchange rate graphs directly to their system for future reference, allowing them to keep track of trends and analyses over time.
+
 ## Requisites 
 - Ensure you have the following dependencies installed:
 Python 3.x
@@ -38,16 +42,10 @@ python main.py
 - Custom Currency Basket: In the "Custom Currency Basket" tab, you can select up to three currencies, assign weights, and plot the basket value against a base currency.
 - Risk Level: The app automatically calculates the volatility and indicates if the currency is "High Risk" or "Low Risk".
 
-## Screenshots
-
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
-
-## Demo
-
-Insert gif or link to demo
-
 ## Future Improvements
 
 - Add more currencies to the database and allow dynamic import of new currency data.
 - Introduce more complex risk assessments based on additional financial indicators.
 - Improve UI and make it more responsive.
+- Implement predictive models (like ARIMA, LSTM) to forecast future exchange rates.
+  
