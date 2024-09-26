@@ -1,4 +1,4 @@
-# XRange Analyzer
+# XRate Analyzer
 
 This project is an application that is GUI-based for displaying currency exchange rates, calculating risk based on volatility, and plotting custom currency baskets. The data is fetched from the MySQL database, the application uses Tkinter for the user interface and Matplotlib for graph plotting. Preprocessing includes filling missing values in the dataset.
 
@@ -25,7 +25,7 @@ Python 3.x
 
 To deploy this project run
 - Clone the repository - 
-git clone [https://github.com/Ketaki124/Cummins_team14_XRange-Analyzer.git]
+git clone [https://github.com/Ketaki124/Cummins_team14_XRate-Analyzer.git]
 - Install the required dependencies
 pip install pandas mysql-connector-python matplotlib numpy
 - Set up the MySQL database as ->
