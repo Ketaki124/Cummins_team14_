@@ -1,8 +1,8 @@
+# -- coding: utf-8 --
 import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import ttk
-import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import mysql.connector
@@ -11,17 +11,18 @@ import mysql.connector
 db_connection = mysql.connector.connect(
     host='localhost',
     user='root',
-    password='root',
-    database='currency_rates'
+    password='dbms@2026#',
+    database='db'
 )
 
 query = 'select * from exchange_rates;'
 data = pd.read_sql(query, db_connection)
 
+
 # Convert the 'Date' column to datetime
 data['Date'] = pd.to_datetime(data['Date'])
 
-def plot_target_graph(selected_currency,target_currency ,selected_year, selected_interval, second_page):
+def plot_target_graph(selected_currency, target_currency, selected_year, selected_interval, second_page):
     if not selected_currency or not selected_year or not selected_interval:
         result_label.config(text="Please select currency and year.")
         return
@@ -35,14 +36,19 @@ def plot_target_graph(selected_currency,target_currency ,selected_year, selected
         filtered_data.set_index('Date', inplace=True)
         if selected_interval == 'Weekly':
             resampled_data = filtered_data[selected_currency].resample('W').mean()
+            x_labels = resampled_data.index.strftime('%U')  # Week numbers
+            x_label_title = 'Weeks'
         elif selected_interval == 'Monthly':
             resampled_data = filtered_data[selected_currency].resample('M').mean()
+            x_labels = resampled_data.index.strftime('%B')  # Month names
+            x_label_title = 'Months'
         elif selected_interval == 'Quarterly':
             resampled_data = filtered_data[selected_currency].resample('Q').mean()
+            x_labels = resampled_data.index.strftime('Q%q')  # Quarter format
+            x_label_title = 'Quarters'
 
-        # standard deviation for the risk factor
         std_dev = np.std(resampled_data)
-        
+
         risk_threshold = 0.05
         if std_dev > risk_threshold:
             color = 'red'  # High risk
@@ -53,39 +59,43 @@ def plot_target_graph(selected_currency,target_currency ,selected_year, selected
             risk_level = "Low Risk"
             volatility_text = "Low Volatility"
 
-        # Create a Matplotlib graph
-        plt.figure(figsize=(10, 6))
-        plt.plot(resampled_data.index, resampled_data, label=f'{selected_currency} Exchange Rate', color=color)
-        plt.xlabel('Date')
-        plt.ylabel(f'Exchange Rate ({selected_currency}/{target_currency})')
-        plt.title(f'{selected_currency} Exchange Rate vs base_currency in {selected_year} ({risk_level})')
-        plt.grid(True)
+        plt.figure(figsize=(10, 5))  # Adjust the figure size
+        plt.plot(resampled_data.index, resampled_data, label=f'{selected_currency} Exchange Rate', color=color, linewidth=2.5)
+        plt.xlabel(x_label_title, fontsize=14, fontweight='bold')
+        plt.ylabel(f'Exchange Rate ({selected_currency}/{target_currency})', fontsize=14, fontweight='bold')
+        plt.title(f'{selected_currency} Exchange Rate vs target_currency in {selected_year} ({risk_level})', fontsize=16, fontweight='bold')
+        plt.grid(True, linestyle='--', alpha=0.7)
         plt.legend()
 
-        # Add volatility text on the plot
+        plt.xticks(ticks=resampled_data.index, labels=x_labels, rotation=45, fontsize=10)
+        plt.yticks(fontsize=10)
+
+        # Add tight layout to make the plot cleaner
+        plt.tight_layout()
+
         plt.text(x=0.5, y=0.95, s=volatility_text, fontsize=12, ha='center', transform=plt.gca().transAxes,
-                 color=color, bbox=dict(facecolor='white', alpha=0.5, edgecolor=color, boxstyle='round,pad=0.3'))
+                color=color, bbox=dict(facecolor='white', alpha=0.7, edgecolor=color, boxstyle='round,pad=0.3'))
 
         for widget in plot_frame.winfo_children():
             widget.destroy()  # Clear previous plots
 
-        canvas = FigureCanvasTkAgg(plt.gcf(), master=plot_frame)  
+        canvas = FigureCanvasTkAgg(plt.gcf(), master=plot_frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=0, column=0) 
+        canvas.get_tk_widget().grid(row=0, column=0)
 
-        # Find peak and lowest values
         peak_value = resampled_data.max()
         lowest_value = resampled_data.min()
         peak_date = resampled_data.idxmax()
         lowest_date = resampled_data.idxmin()
 
-        # Display peak, lowest rates, and risk level on the screen
         peak_info = f"Peak Rate: {peak_value:.2f} on {peak_date.date()}"
         lowest_info = f"Lowest Rate: {lowest_value:.2f} on {lowest_date.date()}"
         result_label.config(text=f"{peak_info}\n{lowest_info}\nVolatility: {std_dev:.2f} ({risk_level})")
 
     except Exception as e:
         result_label.config(text=f"Error: {str(e)}")
+
+
 
 def plot_custom_basket():
     selected_currencies = [currency_combobox1.get(), currency_combobox2.get(), currency_combobox3.get()]
@@ -100,7 +110,7 @@ def plot_custom_basket():
 
     try:
         filtered_data = data[data['Date'].dt.year == int(selected_year)]
-        
+       
         for currency in selected_currencies + [base_currency]:
             if currency not in filtered_data.columns:
                 result_label_basket.config(text=f"Currency '{currency}' not found in the dataset.")
@@ -134,6 +144,9 @@ def plot_custom_basket():
     except Exception as e:
         result_label_basket.config(text=f"Error: {str(e)}")
 
+
+
+
 def switch_to_custom_basket():
     notebook.select(third_page)
 
@@ -146,17 +159,12 @@ root.geometry("%dx%d" % (width, height2))
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
 
-custom_font = tkFont.Font(family="Helvetica", size=11)
-
-# Apply the custom font globally to all widgets
-root.option_add("*Font", custom_font)
-
 # Create the notebook (tabs)
 notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=1, sticky="nsew")
 
 # Left frame for user inputs
-left_frame = tk.Frame(root, width=0.3*width, height=height2, bg="#7FA1C3")
+left_frame = tk.Frame(root, width=300, height=height2, bg="#7FA1C3")
 left_frame.grid(row=0, column=0, sticky="ns")
 left_frame.grid_propagate(False)
 
@@ -190,53 +198,9 @@ plot_frame.grid(row=0, column=0, sticky="nsew")
 result_label = tk.Label(second_page, text="")
 result_label.grid(row=1, column=0, padx=10, pady=10)
 
-# page for custom currency basket
+# Third page for custom currency basket
 third_page = ttk.Frame(notebook)
 notebook.add(third_page, text="Custom Currency Basket")
-
-# page for key terminology
-key_page=ttk.Frame(notebook)
-notebook.add(key_page,text="Key Terminologies")
-
-key_page.grid_columnconfigure(0, weight=1)  # Center
-key_page.grid_rowconfigure(0, weight=1)  
-
-paragraph = """
-Exchange Rate of Currency:
-
-The exchange rate of a currency is the value of one currency expressed in terms of another. For example, if the exchange rate of 1 US Dollar (USD) to Indian Rupees (INR) is 75, this means 1 USD is equivalent to 75 INR.Exchange rates can be fixed (set by a government or central bank) or floating (determined by market forces like supply and demand).
-
-Risk Factor:
-
-The risk factor in currency exchange refers to the uncertainty and potential financial loss due to changes in the exchange rate. Several factors can impact exchange rates, including economic conditions, political events, and interest rate changes.
-High-risk currencies tend to fluctuate more, making them unpredictable, while low-risk currencies are more stable.
-
-Volatility:
-
-Volatility refers to the degree of variation in the value of a currency over a given period. A highly volatile currency fluctuates significantly in value, often within short time frames.
-Volatility is often measured by standard deviation, indicating how much the exchange rate deviates from its average value. High volatility is typically associated with riskier investments.
-
-Appreciation:
-    
-When a currency appreciates, its value increases relative to another currency. For example, if the INR appreciates against the USD, fewer INR will be needed to buy 1 USD.
-
-Depreciation:
-    
-When a currency depreciates, its value decreases relative to another currency. For example, if the INR depreciates against the USD, more INR will be required to buy 1 USD.
-"""
-
-# Create a Label to display the paragraph
-text_widget = tk.Text(key_page, wrap="word", font=("Helvetica", 12), padx=10, pady=10)
-text_widget.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-
-# Insert the paragraph into the Text widget
-text_widget.insert("1.0", paragraph)
-
-# Disable editing of the text widget
-text_widget.config(state="disabled")
-
-# Highlight keywords by adding tags
-keywords = ["Exchange Rate of Currency", "Risk Factor", "Volatility","Appreciation","Depreciation"]
 
 # Inputs for custom basket
 tk.Label(third_page, text="Currency 1:").grid(row=0, column=0, padx=10, pady=10)
@@ -285,5 +249,38 @@ plot_frame_basket.grid(row=6, column=0, columnspan=4, sticky="nsew")
 
 result_label_basket = tk.Label(third_page, text="", wraplength=400)
 result_label_basket.grid(row=7, column=0, columnspan=4, padx=10, pady=10)
+key_page = ttk.Frame(notebook)
+notebook.add(key_page, text="Key Terminologies")
+
+key_page.grid_columnconfigure(0, weight=1)  # Center
+key_page.grid_rowconfigure(0, weight=1)
+
+# Displaying the key terminologies
+paragraph = """
+Exchange Rate of Currency:
+
+The exchange rate of a currency is the value of one currency expressed in terms of another. For example, if the exchange rate of 1 US Dollar (USD) to Indian Rupees (INR) is 75, this means 1 USD is equivalent to 75 INR. Exchange rates can be fixed (set by a government or central bank) or floating (determined by market forces like supply and demand).
+
+Risk Factor:
+
+The risk factor in currency exchange refers to the uncertainty and potential financial loss due to changes in the exchange rate. Several factors can impact exchange rates, including economic conditions, political events, and interest rate changes. High-risk currencies tend to fluctuate more, making them unpredictable, while low-risk currencies are more stable.
+
+Volatility:
+
+Volatility refers to the degree of variation in the value of a currency over a given period. A highly volatile currency fluctuates significantly in value, often within short time frames. Volatility is often measured by standard deviation, indicating how much the exchange rate deviates from its average value. High volatility is typically associated with riskier investments.
+
+Appreciation:
+
+When a currency appreciates, its value increases relative to another currency. For example, if the INR appreciates against the USD, fewer INR will be needed to buy 1 USD.
+
+Depreciation:
+
+When a currency depreciates, its value decreases relative to another currency. For example, if the INR depreciates against the USD, more INR will be required to buy 1 USD.
+"""
+
+# Create a label to display the paragraph
+text_label = tk.Label(key_page, text=paragraph, wraplength=800, justify="left", anchor="nw")
+text_label.grid(row=0, column=0, padx=10, pady=10)
+
 
 root.mainloop()
