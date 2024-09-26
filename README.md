@@ -25,7 +25,7 @@ Python 3.x
 
 To deploy this project run
 - Clone the repository - 
-git clone https://github.com/your-username/currency-exchange-viewer.git
+git clone [https://github.com/Ketaki124/Cummins_team14_XRange-Analyzer.git]
 - Install the required dependencies
 pip install pandas mysql-connector-python matplotlib numpy
 - Set up the MySQL database as ->
