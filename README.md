@@ -1,6 +1,6 @@
 # XRange Analyzer
 
-This project is an application that is GUI-based for displaying currency exchange rates, calculating risk based on volatility, and plotting custom currency baskets. The data is fetched from the MySQL database, the application uses Tkinter for the user interface and Matplotlib for graph plotting. Preprocessing includes filling missing values in the dataset and removing extra spaces.
+This project is an application that is GUI-based for displaying currency exchange rates, calculating risk based on volatility, and plotting custom currency baskets. The data is fetched from the MySQL database, the application uses Tkinter for the user interface and Matplotlib for graph plotting. Preprocessing includes filling missing values in the dataset.
 ## Features
 
 - Data Preprocessing: It fills in missing values and removes extra spaces in the dataset automatically.
