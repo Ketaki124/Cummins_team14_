@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import ttk
+import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import mysql.connector
@@ -53,12 +53,12 @@ def plot_target_graph(selected_currency,target_currency ,selected_year, selected
             risk_level = "Low Risk"
             volatility_text = "Low Volatility"
 
-        # Create a Matplotlib figure
+        # Create a Matplotlib graph
         plt.figure(figsize=(10, 6))
         plt.plot(resampled_data.index, resampled_data, label=f'{selected_currency} Exchange Rate', color=color)
         plt.xlabel('Date')
         plt.ylabel(f'Exchange Rate ({selected_currency}/{target_currency})')
-        plt.title(f'{selected_currency} Exchange Rate vs {target_currency} in {selected_year} ({risk_level})')
+        plt.title(f'{selected_currency} Exchange Rate vs base_currency in {selected_year} ({risk_level})')
         plt.grid(True)
         plt.legend()
 
@@ -146,12 +146,17 @@ root.geometry("%dx%d" % (width, height2))
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
 
+custom_font = tkFont.Font(family="Helvetica", size=11)
+
+# Apply the custom font globally to all widgets
+root.option_add("*Font", custom_font)
+
 # Create the notebook (tabs)
 notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=1, sticky="nsew")
 
 # Left frame for user inputs
-left_frame = tk.Frame(root, width=300, height=height2, bg="#7FA1C3")
+left_frame = tk.Frame(root, width=0.3*width, height=height2, bg="#7FA1C3")
 left_frame.grid(row=0, column=0, sticky="ns")
 left_frame.grid_propagate(False)
 
@@ -185,9 +190,53 @@ plot_frame.grid(row=0, column=0, sticky="nsew")
 result_label = tk.Label(second_page, text="")
 result_label.grid(row=1, column=0, padx=10, pady=10)
 
-# Third page for custom currency basket
+# page for custom currency basket
 third_page = ttk.Frame(notebook)
 notebook.add(third_page, text="Custom Currency Basket")
+
+# page for key terminology
+key_page=ttk.Frame(notebook)
+notebook.add(key_page,text="Key Terminologies")
+
+key_page.grid_columnconfigure(0, weight=1)  # Center
+key_page.grid_rowconfigure(0, weight=1)  
+
+paragraph = """
+Exchange Rate of Currency:
+
+The exchange rate of a currency is the value of one currency expressed in terms of another. For example, if the exchange rate of 1 US Dollar (USD) to Indian Rupees (INR) is 75, this means 1 USD is equivalent to 75 INR.Exchange rates can be fixed (set by a government or central bank) or floating (determined by market forces like supply and demand).
+
+Risk Factor:
+
+The risk factor in currency exchange refers to the uncertainty and potential financial loss due to changes in the exchange rate. Several factors can impact exchange rates, including economic conditions, political events, and interest rate changes.
+High-risk currencies tend to fluctuate more, making them unpredictable, while low-risk currencies are more stable.
+
+Volatility:
+
+Volatility refers to the degree of variation in the value of a currency over a given period. A highly volatile currency fluctuates significantly in value, often within short time frames.
+Volatility is often measured by standard deviation, indicating how much the exchange rate deviates from its average value. High volatility is typically associated with riskier investments.
+
+Appreciation:
+    
+When a currency appreciates, its value increases relative to another currency. For example, if the INR appreciates against the USD, fewer INR will be needed to buy 1 USD.
+
+Depreciation:
+    
+When a currency depreciates, its value decreases relative to another currency. For example, if the INR depreciates against the USD, more INR will be required to buy 1 USD.
+"""
+
+# Create a Label to display the paragraph
+text_widget = tk.Text(key_page, wrap="word", font=("Helvetica", 12), padx=10, pady=10)
+text_widget.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+
+# Insert the paragraph into the Text widget
+text_widget.insert("1.0", paragraph)
+
+# Disable editing of the text widget
+text_widget.config(state="disabled")
+
+# Highlight keywords by adding tags
+keywords = ["Exchange Rate of Currency", "Risk Factor", "Volatility","Appreciation","Depreciation"]
 
 # Inputs for custom basket
 tk.Label(third_page, text="Currency 1:").grid(row=0, column=0, padx=10, pady=10)
