@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import mysql.connector
@@ -22,6 +23,14 @@ data = pd.read_sql(query, db_connection)
 # Convert the 'Date' column to datetime
 data['Date'] = pd.to_datetime(data['Date'])
 
+def save_graph():
+    # Ask the user for the file path to save the image
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", 
+                                             filetypes=[("PNG files", ".png"), ("All files", ".*")])
+    if file_path:
+        plt.gcf().savefig(file_path)
+        print(f"Graph saved as {file_path}")
+        
 def plot_target_graph(selected_currency, target_currency, selected_year, selected_interval, second_page):
     if not selected_currency or not selected_year or not selected_interval:
         result_label.config(text="Please select currency and year.")
@@ -82,6 +91,8 @@ def plot_target_graph(selected_currency, target_currency, selected_year, selecte
         canvas = FigureCanvasTkAgg(plt.gcf(), master=plot_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0)
+
+        tk.Button(left_frame, text="Save Graph", command=lambda: save_graph()).grid(row=6, column=0, columnspan=2, padx=10, pady=5)
 
         peak_value = resampled_data.max()
         lowest_value = resampled_data.min()
